@@ -1,0 +1,93 @@
+networks:
+  shorturlnet:
+    name: shorturlnet
+    driver: bridge
+
+volumes:
+  authdb:
+  admindb:
+
+services:
+  auth:
+    build:
+      context: microservices/auth
+      dockerfile: Dockerfile
+    container_name: shorturl_auth
+    ports:
+      - ${AUTH_SERVICE_PORT}:80
+    networks:
+      - shorturlnet
+    depends_on:
+      - authdb
+
+  admin:
+    build:
+      context: microservices/admin
+      dockerfile: Dockerfile
+    container_name: shorturl_admin
+    ports:
+      - ${ADMIN_SERVICE_PORT}:80
+    networks:
+      - shorturlnet
+    depends_on:
+      - admindb
+
+  lookup:
+    build:
+      context: microservices/lookup
+      dockerfile: Dockerfile
+    container_name: shorturl_lookup
+    ports:
+      - ${LOOKUP_SERVICE_PORT}:80
+    networks:
+      - shorturlnet
+
+  authdb:
+    image: mysql:5.7
+    container_name: shorturl_authdb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${AUTHDB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${AUTHDB_DATABASE}
+      - MYSQL_USER=${AUTHDB_USER}
+      - MYSQL_PASSWORD=${AUTHDB_PASSWORD}
+    ports:
+      - ${AUTHDB_PORT}:3306
+    networks:
+      - shorturlnet
+    volumes:
+      - authdb:/var/lib/mysql
+
+  admindb:
+    image: mysql:5.7
+    container_name: shorturl_admindb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ADMINDB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${ADMINDB_DATABASE}
+      - MYSQL_USER=${ADMINDB_USER}
+      - MYSQL_PASSWORD=${ADMINDB_PASSWORD}
+    ports:
+      - ${ADMINDB_PORT}:3306
+    networks:
+      - shorturlnet
+    volumes:
+      - admindb:/var/lib/mysql
+
+  lookupcache:
+    image: redis:latest
+    container_name: shorturl_lookupcache
+    ports:
+      - ${LOOKUPCACHE_PORT}:6379
+    networks:
+      - shorturlnet
+
+  gateway:
+    image: nginx:latest
+    container_name: shorturl_gateway
+    volumes:
+      - ./infrastructure/local/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infrastructure/local/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs/nginx:/var/log/nginx:rw
+    ports:
+      - ${GATEWAY_PORT}:80
+    networks:
+      - shorturlnet
