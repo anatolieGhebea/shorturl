@@ -12,7 +12,6 @@ shorturl is a mock project designed to practice microservice architecture by pro
     - [Auth Service](#auth-service)
     - [Admin Service](#admin-service)
     - [Lookup Service](#lookup-service)
-  - [Request Flow](#request-flow)
   - [Technologies](#technologies)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
@@ -27,6 +26,8 @@ shorturl enables users to shorten long URLs, facilitating easy sharing and manag
 ## Architecture
 
 The system leverages a microservice architecture to handle different aspects of URL shortening efficiently.
+
+![Request Diagram](assets/service_diagram.png)
 
 ## Services
 
@@ -54,10 +55,6 @@ Redirects short URLs to their original long URLs or returns appropriate errors i
 - **Capabilities:**
   - Resolve short URLs to original URLs
   - Handle redirection logic
-
-## Request Flow
-
-![Request Diagram](assets/service_diagram.png)
 
 ## Technologies
 
